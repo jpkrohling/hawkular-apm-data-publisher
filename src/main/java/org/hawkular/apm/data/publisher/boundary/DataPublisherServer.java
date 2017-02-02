@@ -16,18 +16,24 @@
  */
 package org.hawkular.apm.data.publisher.boundary;
 
-import io.vertx.core.Vertx;
-import io.vertx.ext.web.Router;
+import java.io.IOException;
+
+import org.hawkular.apm.data.publisher.control.SpanPublisher;
+
+import io.grpc.ServerBuilder;
 
 /**
  * @author Juraci Paixão Kröhling
  */
 public class DataPublisherServer {
     public static void start(String bindTo, int port) {
-        Vertx vertx = Vertx.vertx();
-        Router router = Router.router(vertx);
-        vertx.createHttpServer()
-                .requestHandler(router::accept)
-                .listen(port, bindTo);
+        try {
+            ServerBuilder.forPort(port)
+                    .addService(new SpanPublisher())
+                    .build()
+                    .start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
